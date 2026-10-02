@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Egypt LEGO Trip</title>
+<meta name="theme-color" content="#f4f1e8">
+<style>
+:root{
+  --bg:#f4f1e8;--surface:#fffdf7;--ink:#172326;--muted:#627174;--line:#d8d6cd;
+  --accent:#1e5b69;--soft:#eaf1f1;--gold:#d7b86b;
+  --trav1:url("https://d8j0ntlcm91z4.cloudfront.net/user_3I2VcYiTyGz1HrPzShsnYo8Ahbx/hf_20261001_021405_9a255f7f-0553-4891-a8f9-ac0becadba3d.png");
+  --trav2:url("https://d8j0ntlcm91z4.cloudfront.net/user_3I2VcYiTyGz1HrPzShsnYo8Ahbx/hf_20261001_021405_b0e3a796-b597-4308-b22d-c91cdef7f142.png");
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}
+button{font:inherit}
+.app{max-width:1440px;margin:auto;padding:12px}
+.hero,.panel,.stage{background:var(--surface);border:1px solid var(--line);box-shadow:0 10px 28px #17232616}
+.hero{border-radius:24px;padding:20px;background:linear-gradient(135deg,#fffdf7,#efe6cd 62%,#dbe9e9)}
+.kicker{font-size:11px;letter-spacing:.14em;color:var(--accent);font-weight:800}
+.hero h1{font-size:clamp(32px,6vw,56px);line-height:1;margin:6px 0}
+.route{font-weight:700;color:var(--muted);font-size:13px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.chip{padding:7px 10px;border-radius:999px;border:1px solid #1723261f;background:#ffffffbb;font-size:11px;font-weight:800}
+.tabs{display:flex;gap:8px;overflow:auto;padding:12px 1px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:9px 12px;text-align:left;font-weight:800}
+.tab small{display:block;color:var(--muted);font-weight:600;font-size:9px;margin-top:3px}
+.tab.active{background:var(--ink);color:white}.tab.active small{color:#cdd7d7}
+.grid{display:grid;grid-template-columns:minmax(320px,.82fr) minmax(0,1.55fr);gap:12px}
+.panel{border-radius:22px;overflow:hidden}
+.head{padding:16px;border-bottom:1px solid #ebe7dc}
+.head h2{margin:0 0 4px;font-size:19px}.meta{font-size:11px;color:var(--muted);font-weight:700}
+.cards{padding:10px;display:flex;gap:9px;flex-direction:column;max-height:72vh;overflow:auto}
+.card{position:relative;border:1px solid #e7e3d8;border-radius:16px;background:#fff;padding:13px 12px 12px 58px;cursor:pointer}
+.card.active{border-color:#9fbec4;box-shadow:0 8px 20px #17232618}
+.time{position:absolute;left:11px;top:13px;width:40px;font:800 11px/1.15 ui-monospace,monospace;color:var(--accent)}
+.card h3{margin:0 0 5px;font-size:13px}.card p{margin:0;color:var(--muted);font-size:11px;line-height:1.45}
+.transport{display:inline-block;margin-top:7px;padding:5px 7px;border-radius:999px;background:#edf4f4;color:var(--accent);font-size:9px;font-weight:800}
+.choice{display:inline-block;margin:6px 5px 0 0;padding:5px 7px;border:1px solid #ebdca6;background:#fff8df;border-radius:9px;font-size:9px;font-weight:800}
+.map{position:relative;min-height:610px;overflow:hidden;background:#d9c7a9;touch-action:none}
+.map-toolbar{position:absolute;left:12px;top:12px;right:12px;z-index:20;display:flex;justify-content:space-between;gap:10px;pointer-events:none}
+.map-labels{display:flex;gap:6px;flex-wrap:wrap}
+.map-label{background:#fffdf7e9;border:1px solid #fff;padding:8px 10px;border-radius:12px;font-size:10px;font-weight:900;backdrop-filter:blur(8px)}
+.controls{display:flex;gap:6px;pointer-events:auto}
+.ctrl{border:1px solid #1723262f;background:#fffdf7f4;height:38px;min-width:38px;border-radius:11px;font-weight:900}
+.ctrl.reset{padding:0 11px}
+.viewport{position:absolute;inset:0;overflow:hidden;cursor:grab}
+.viewport:active{cursor:grabbing}
+.world{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform;transition:transform .08s linear}
+.scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;pointer-events:none;filter:saturate(.92) contrast(.98)}
+.grade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#ffffff0d,transparent 28%,#0f1c231f)}
+.grade.sunrise{background:radial-gradient(circle at 28% 22%,rgba(255,186,103,.42),transparent 28%),linear-gradient(180deg,rgba(244,145,76,.18),rgba(255,216,155,.08) 45%,rgba(15,28,31,.12))}
+.segment{position:absolute;height:3px;transform-origin:0 50%;z-index:3;border-radius:99px;opacity:.88;box-shadow:0 1px 0 #ffffff80}
+.segment.road{background:repeating-linear-gradient(90deg,var(--accent) 0 10px,#f7f4eccc 10px 14px)}
+.segment.walk{height:2px;background:repeating-linear-gradient(90deg,var(--accent) 0 3px,transparent 3px 7px);box-shadow:none}
+.segment.flight{height:2px;background:repeating-linear-gradient(90deg,var(--accent) 0 14px,transparent 14px 22px);box-shadow:none}
+.segment.active{height:4px;animation:routeFlow 1.2s linear infinite;z-index:4}
+.route-traveler{position:absolute;top:50%;left:0;width:52px;height:62px;transform:translate(-50%,-78%);z-index:9;pointer-events:none;opacity:0}
+.route-traveler i{display:block;width:100%;height:100%;background:var(--trav1) center bottom/contain no-repeat;transform:rotate(var(--counter-angle));transform-origin:50% 82%;animation:spriteWalk .78s steps(1,end) infinite,spriteBob .39s ease-in-out infinite alternate;filter:drop-shadow(0 5px 4px #17232630)}
+.route-traveler.leg1{animation:routeLegOne 18s linear infinite}
+.route-traveler.leg2{animation:routeLegTwo 18s linear infinite}
+.pin{position:absolute;transform:translate(-50%,-50%);border:0;background:transparent;z-index:8;cursor:pointer;display:flex;align-items:center;gap:5px}
+.pin-number{width:28px;height:28px;border-radius:10px 10px 10px 3px;background:#fffcf5f5;border:1px solid #17232638;box-shadow:0 5px 12px #17232629;display:grid;place-items:center;font:700 9px/1 ui-monospace,monospace}
+.pin-label{background:#fffcf5ed;border:1px solid #17232624;border-radius:8px;padding:5px 7px;font-size:9px;font-weight:650;box-shadow:0 4px 10px #1723261a}
+.pin.active{z-index:11}.pin.active .pin-number,.pin.active .pin-label{background:var(--accent);border-color:var(--accent);color:white}
+.pin.active .pin-number{box-shadow:0 0 0 5px var(--soft),0 8px 18px #17232633}
+.pin.active:after{content:"";position:absolute;left:8px;top:8px;width:10px;height:10px;border-radius:50%;border:1px solid white;animation:pulse 1.8s ease-out infinite}
+.balloon{position:absolute;width:54px;height:66px;left:29%;top:29%;transform:translate(-50%,-115%);z-index:7;pointer-events:none;filter:drop-shadow(0 6px 6px #17232638);animation:balloonFloat 3.6s ease-in-out infinite alternate}
+.balloon:before{content:"";position:absolute;left:8px;right:8px;top:0;height:45px;border-radius:50% 50% 44% 44%;background:repeating-linear-gradient(90deg,#d96e45 0 8px,#f5c967 8px 16px,#8f443b 16px 24px)}
+.balloon:after{content:"";position:absolute;width:14px;height:11px;background:#5f3c28;bottom:3px;left:20px;border-radius:2px}
+.ambient{position:absolute;z-index:5;pointer-events:none;filter:drop-shadow(0 4px 4px #1723262b)}
+.ambient img{width:100%;height:100%;object-fit:contain;display:block}
+.guide{left:17%;top:63%;width:48px;height:60px;animation:ambientA 14s ease-in-out infinite alternate}
+.tourist{left:73%;top:41%;width:46px;height:58px;animation:ambientB 16s ease-in-out infinite alternate}
+.hint{position:absolute;left:12px;bottom:12px;z-index:20;padding:7px 10px;border-radius:10px;background:#141f21ad;color:white;backdrop-filter:blur(10px);font:500 9px/1 ui-monospace,monospace;pointer-events:none}
+.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.stage{border-radius:15px;padding:12px;text-align:center;font-size:11px;font-weight:900}
+.stage span{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.note{text-align:center;color:var(--muted);font-size:9px;padding:9px 0 2px}
+@keyframes routeFlow{to{background-position:34px 0}}
+@keyframes routeLegOne{0%{left:2%;opacity:1}44%{left:98%;opacity:1}45%,100%{left:98%;opacity:0}}
+@keyframes routeLegTwo{0%,49%{left:2%;opacity:0}50%{left:2%;opacity:1}94%{left:98%;opacity:1}95%,100%{left:98%;opacity:0}}
+@keyframes spriteWalk{0%,49%{background-image:var(--trav1)}50%,100%{background-image:var(--trav2)}}
+@keyframes spriteBob{from{translate:0 0}to{translate:0 -3px}}
+@keyframes pulse{0%{transform:scale(.5);opacity:.8}100%{transform:scale(3);opacity:0}}
+@keyframes balloonFloat{from{translate:0 1px}to{translate:0 -6px}}
+@keyframes ambientA{from{transform:translate3d(-10px,0,0)}to{transform:translate3d(24px,-4px,0)}}
+@keyframes ambientB{from{transform:translate3d(-8px,0,0)}to{transform:translate3d(22px,-3px,0)}}
+@media(max-width:880px){
+ .app{padding:8px}.grid{grid-template-columns:1fr}.map{min-height:470px}.cards{max-height:none}.stages{grid-template-columns:repeat(2,1fr)}
+ .route-traveler{width:38px;height:47px}.pin-label{display:none}.pin-number{width:27px;height:27px}.ambient{display:none}.hint{display:none}
+ .segment{height:2px}.segment.active{height:3px}.balloon{width:44px;height:55px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+ .route-traveler{left:50%!important;opacity:1}.route-traveler.leg2{display:none}.ambient{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<section class="hero">
+  <div class="kicker">J.DOT TRAVEL · OCT 2026</div>
+  <h1>Egypt LEGO Trip</h1>
+  <div class="route">Cairo · Giza · Luxor · Hurghada · Cairo</div>
+  <div class="chips"><span class="chip">Oct 9–18 · 10 Days</span><span class="chip" id="party">4 travelers</span><span class="chip">Interactive itinerary</span><span class="chip">No login required</span></div>
+</section>
+<div id="tabs" class="tabs"></div>
+<div class="grid">
+  <section class="panel">
+    <div class="head"><h2 id="title"></h2><div class="meta" id="meta"></div></div>
+    <div id="cards" class="cards"></div>
+  </section>
+  <section class="panel map" id="map">
+    <div class="map-toolbar">
+      <div class="map-labels"><span class="map-label" id="mapTitle"></span><span class="map-label" id="stats"></span></div>
+      <div class="controls"><button class="ctrl" id="minus">−</button><button class="ctrl" id="plus">+</button><button class="ctrl reset" id="reset">Reset</button></div>
+    </div>
+    <div class="viewport" id="viewport">
+      <div class="world" id="world">
+        <img class="scene" id="scene" alt="">
+        <div class="grade" id="grade"></div>
+        <div id="segments"></div>
+        <div id="pins"></div>
+        <div class="balloon" id="balloon" hidden></div>
+        <div class="ambient guide"><img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3I2VcYiTyGz1HrPzShsnYo8Ahbx/hf_20261001_021406_122c094a-d921-4800-8687-dc1784ec79b0.png"></div>
+        <div class="ambient tourist"><img alt="" src="https://d8j0ntlcm91z4.cloudfront.net/user_3I2VcYiTyGz1HrPzShsnYo8Ahbx/hf_20261001_021405_39f9bf0b-0b89-487e-96d7-19fe65fba22b.png"></div>
+      </div>
+    </div>
+    <div class="hint">Drag to explore · controls to zoom</div>
+  </section>
+</div>
+<div class="stages">
+  <div class="stage">CAIRO / GIZA<span>Days 1–2</span></div>
+  <div class="stage">LUXOR<span>Days 3–5</span></div>
+  <div class="stage">HURGHADA<span>Days 5–8</span></div>
+  <div class="stage">CAIRO / HOME<span>Days 8–10</span></div>
+</div>
+<div class="note">Optional stops are choices, not mandatory. Times are itinerary estimates.</div>
+</div>
+<script>
+const SCENES={
+ giza:"https://d8j0ntlcm91z4.cloudfront.net/user_3I2VcYiTyGz1HrPzShsnYo8Ahbx/hf_20261001_001719_49b8fdef-24f4-4616-b1e6-116bda7bebca.png",
+ master:"https://d8j0ntlcm91z4.cloudfront.net/user_3I2VcYiTyGz1HrPzShsnYo8Ahbx/hf_20261001_001640_32616138-9567-4011-900a-954a3895aace.png",
+ luxor:"https://d8j0ntlcm91z4.cloudfront.net/user_3I2VcYiTyGz1HrPzShsnYo8Ahbx/hf_20261001_003417_cff78418-e791-4a09-abcb-73ff92714abe.png",
+ hurghada:"https://d8j0ntlcm91z4.cloudfront.net/user_3I2VcYiTyGz1HrPzShsnYo8Ahbx/hf_20261001_003417_a0d172cc-1fa3-47f5-a985-aa695dc01491.png",
+ cairo:"https://d8j0ntlcm91z4.cloudfront.net/user_3I2VcYiTyGz1HrPzShsnYo8Ahbx/hf_20261001_003417_781cbdfc-021e-47e9-9979-9866505b475a.png"
+};
+const days=[
+{date:"Oct 9 Fri",party:"4 travelers",title:"Arrival in Cairo & Giza",region:"Cairo → Giza",stats:"Arrival day · light pace",scene:"giza",stops:[
+ {time:"04:25",name:"Dubai arrival & lounge layover",desc:"EK0323 arrives DXB. Lounge / airport layover.",transport:"flight",x:92,y:18,hidden:true},
+ {time:"08:15",name:"EK0927 Dubai → Cairo",desc:"International flight to Cairo.",transport:"flight",x:90,y:20,hidden:true},
+ {time:"11:05",name:"Cairo International Airport",desc:"Visa · immigration · ATM.",transport:"road",x:82,y:28},
+ {time:"12:30",name:"Airport → Giza lodging",desc:"Private van / taxi to Giza.",transport:"road",x:60,y:47},
+ {time:"13:00",name:"Giza lodging check-in & rest",desc:"Check in and recover.",transport:"road",x:36,y:62},
+ {time:"18:00",name:"Rooftop 7000 dinner",desc:"Pyramid-view dinner.",transport:"walk",x:43,y:52},
+ {time:"Evening",name:"Haram Bazaar + Sound & Light",desc:"Optional if energy is good.",transport:"road",x:51,y:67}
+]},
+{date:"Oct 10 Sat",party:"4 travelers",title:"Pyramids, Sphinx, Mena House & GEM",region:"Giza",stats:"Full sightseeing day",scene:"giza",stops:[
+ {time:"07:50",name:"Meet guide at Giza KFC",desc:"Meeting point before tour.",transport:"walk",x:34,y:70},
+ {time:"08:00",name:"Giza Plateau & Great Pyramid",desc:"Great Pyramid interior optional.",transport:"road",x:52,y:34},
+ {time:"10:45",name:"Great Sphinx & Valley Temple",desc:"Complete guided Giza section.",transport:"road",x:67,y:58},
+ {time:"13:00",name:"Marriott Mena House lunch",desc:"Pyramid-view lunch.",transport:"road",x:48,y:27},
+ {time:"15:00",name:"Grand Egyptian Museum",desc:"GEM visit for about 3–4 hours.",transport:"road",x:82,y:24},
+ {time:"Evening",name:"Free evening",desc:"Dinner and rest.",transport:"walk",x:39,y:64}
+]},
+{date:"Oct 11 Sun",party:"4 travelers",title:"SM062 to Luxor + Temple Night",region:"Giza → Luxor",stats:"Domestic flight · evening walk",scene:"master",stops:[
+ {time:"10:00",name:"Giza lodging checkout",desc:"Transfer to Cairo Airport.",transport:"road",x:28,y:34},
+ {time:"12:45",name:"SM062 Cairo → Luxor",desc:"Domestic flight. Arrive 14:30.",transport:"flight",x:50,y:43},
+ {time:"14:30",name:"Luxor International Airport",desc:"Collect bags and transfer.",transport:"road",x:70,y:63},
+ {time:"15:15",name:"Luxor lodging check-in",desc:"Rest before evening outing.",transport:"road",x:62,y:53},
+ {time:"Evening",name:"Luxor Temple night visit",desc:"Night visit.",transport:"walk",x:58,y:43},
+ {time:"After temple",name:"Spices & karkade shopping",desc:"Shop and return to lodging.",transport:"walk",x:54,y:48}
+]},
+{date:"Oct 12 Mon",party:"4 travelers",title:"Full-day West & East Bank Tour",region:"Luxor",stats:"Full-day archaeology tour",scene:"luxor",stops:[
+ {time:"AM",name:"Valley of the Kings",desc:"Selected royal tombs.",transport:"road",x:22,y:34},
+ {time:"AM",name:"Hatshepsut Temple",desc:"Terraced mortuary temple.",transport:"road",x:32,y:44},
+ {time:"Late AM",name:"Deir el-Medina",desc:"Workers' village.",transport:"road",x:39,y:58},
+ {time:"Noon",name:"Medinet Habu",desc:"Ramses III temple complex.",transport:"road",x:31,y:70},
+ {time:"PM",name:"Karnak Temple",desc:"Finish with Karnak.",transport:"road",x:74,y:35},
+ {time:"Night",name:"Pack for pre-dawn departure",desc:"Prepare for 04:00 balloon pickup.",transport:"walk",x:61,y:58}
+]},
+{date:"Oct 13 Tue",party:"4 → 5 travelers at 14:00",title:"Sunrise Balloon + Hurghada + Horse Ride",region:"Luxor → Hurghada",stats:"Sunrise · road transfer · 5 travelers",scene:"master",sunrise:true,stops:[
+ {time:"04:00",name:"Luxor hot-air balloon tour",desc:"Sunrise flight for the original 4.",transport:"road",x:29,y:29,balloon:true},
+ {time:"09:30",name:"Luxor lodging checkout",desc:"Prepare the minivan.",transport:"road",x:59,y:58},
+ {time:"11:00",name:"Minivan Luxor → Hurghada",desc:"Main group road transfer.",transport:"road",x:70,y:53},
+ {time:"13:00",name:"5th traveler arrives at HRG",desc:"Separate arrival branch.",transport:"road",x:85,y:38,breakBefore:true,breakAfter:true},
+ {time:"14:00",name:"Hilton check-in · group of 5",desc:"Everyone together from here.",transport:"road",x:80,y:62},
+ {time:"16:00",name:"Beach horse ride + sea swim",desc:"Two-hour ride and swim.",transport:"road",x:68,y:72}
+]},
+{date:"Oct 14 Wed",party:"5 travelers",title:"Diving Day 1",region:"Hurghada",stats:"Full diving day",scene:"hurghada",stops:[
+ {time:"AM",name:"Hilton pickup / dive center",desc:"Meet operator and load gear.",transport:"road",x:37,y:65},
+ {time:"Full day",name:"Diving · Day 1",desc:"Boat activity; ground route only.",transport:"road",x:65,y:43},
+ {time:"PM",name:"Return to Hilton",desc:"Recovery evening.",transport:"walk",x:38,y:67}
+]},
+{date:"Oct 15 Thu",party:"5 travelers",title:"Diving Day 2 + Free Afternoon",region:"Hurghada",stats:"Final water exit by 16:15",scene:"hurghada",stops:[
+ {time:"AM",name:"Hilton → dive center",desc:"Morning transfer.",transport:"road",x:37,y:65},
+ {time:"Morning",name:"Diving · Day 2",desc:"Final water exit by 16:15.",transport:"road",x:65,y:43},
+ {time:"After diving",name:"Free time + packing",desc:"Rest and luggage prep.",transport:"walk",x:40,y:69}
+]},
+{date:"Oct 16 Fri",party:"5 travelers",title:"MS047 to Cairo + Flexible Cairo Afternoon",region:"Hurghada → Cairo",stats:"Domestic flight · flexible evening",scene:"master",stops:[
+ {time:"08:00",name:"Hilton checkout & airport transfer",desc:"Leave for Hurghada Airport.",transport:"road",x:80,y:65},
+ {time:"10:15",name:"MS047 Hurghada → Cairo",desc:"Domestic flight. Arrive 11:15.",transport:"flight",x:59,y:46},
+ {time:"11:15",name:"Cairo International Airport",desc:"Collect bags and transfer.",transport:"road",x:77,y:29},
+ {time:"13:00",name:"Novotel Cairo Airport",desc:"Check in or leave luggage.",transport:"road",x:70,y:35},
+ {time:"Afternoon",name:"Choose 1",desc:"NMEC / Coptic Cairo / Baron Palace",transport:"road",x:48,y:55,choice:true},
+ {time:"Evening",name:"Choose 1",desc:"Al-Azhar + Khan el-Khalili / Nile felucca",transport:"road",x:38,y:48,choice:true}
+]},
+{date:"Oct 17 Sat",party:"5 travelers",title:"Final Cairo Morning + EK0922",region:"Cairo → Dubai",stats:"Sightseeing · departure",scene:"cairo",stops:[
+ {time:"08:30",name:"Novotel checkout & luggage storage",desc:"Leave large luggage at hotel.",transport:"road",x:70,y:35},
+ {time:"09:00",name:"Saladin Citadel or missed sights",desc:"Prioritize one or two places.",transport:"road",x:45,y:48},
+ {time:"11:30",name:"Koshary lunch",desc:"Final Cairo lunch.",transport:"road",x:42,y:55},
+ {time:"13:00",name:"Return to Novotel & collect bags",desc:"Collect stored luggage.",transport:"road",x:70,y:35},
+ {time:"14:30",name:"Cairo Airport arrival",desc:"Check-in / security / gate.",transport:"walk",x:79,y:28},
+ {time:"17:25",name:"EK0922 Cairo → Dubai",desc:"International flight.",transport:"flight",x:92,y:18,hidden:true},
+ {time:"22:20",name:"Dubai arrival & airport wait",desc:"Wait airside for EK0322.",transport:"walk",x:92,y:18,hidden:true}
+]},
+{date:"Oct 18 Sun",party:"5 travelers",title:"Return Home",region:"Dubai → Incheon",stats:"No local Egypt pins",scene:"master",stops:[
+ {time:"03:40",name:"EK0322 Dubai → Incheon",desc:"International flight home.",transport:"flight",x:90,y:20,hidden:true},
+ {time:"17:00",name:"Incheon arrival",desc:"Trip complete.",transport:"walk",x:90,y:20,hidden:true}
+]}
+];
+
+let current=0,zoom=1,panX=0,panY=0,drag=null;
+const $=id=>document.getElementById(id);
+function transportLabel(t){return t==="flight"?"Domestic Flight":t==="road"?"Van / Taxi":"Walk"}
+function routeClass(t){return t==="flight"?"flight":t==="walk"?"walk":"road"}
+function renderTabs(){
+  $("tabs").innerHTML="";
+  days.forEach((d,i)=>{
+    const b=document.createElement("button");
+    b.className="tab"+(i===current?" active":"");
+    b.innerHTML=`Day ${i+1}<small>${d.date}</small>`;
+    b.onclick=()=>{current=i;resetView();render()};
+    $("tabs").appendChild(b);
+  });
+}
+function render(){
+  const d=days[current];
+  renderTabs();
+  $("title").textContent=`Day ${current+1} · ${d.title}`;
+  $("meta").textContent=`${d.date} · ${d.party}`;
+  $("party").textContent=d.party;
+  $("mapTitle").textContent=d.region;
+  $("stats").textContent=d.stats;
+  $("scene").src=SCENES[d.scene];
+  $("grade").className="grade"+(d.sunrise?" sunrise":"");
+  $("balloon").hidden=!d.sunrise;
+
+  $("cards").innerHTML="";
+  d.stops.forEach((s,i)=>{
+    const c=document.createElement("div");
+    c.className="card";
+    c.dataset.i=i;
+    let choices="";
+    if(s.choice) choices=s.desc.split(" / ").map(x=>`<span class="choice">${x}</span>`).join("");
+    c.innerHTML=`<div class="time">${s.time}</div><h3>${s.name}</h3><p>${s.choice?"Pick one option for this window.":s.desc}</p>${choices}<span class="transport">${transportLabel(s.transport)}</span>`;
+    c.onclick=()=>focusStop(i);
+    $("cards").appendChild(c);
+  });
+
+  const mapStops=d.stops.map((stop,index)=>({stop,index})).filter(x=>!x.stop.hidden);
+  const segments=[];
+  for(let i=0;i<mapStops.length-1;i++){
+    const from=mapStops[i],to=mapStops[i+1];
+    if(from.stop.breakAfter||to.stop.breakBefore) continue;
+    segments.push({from,to});
+  }
+  $("segments").innerHTML="";
+  segments.forEach((seg,i)=>{
+    const a=seg.from.stop,b=seg.to.stop;
+    const dx=b.x-a.x,dy=b.y-a.y;
+    const length=Math.sqrt(dx*dx+dy*dy);
+    const angle=Math.atan2(dy,dx)*180/Math.PI;
+    const el=document.createElement("div");
+    el.className="segment "+routeClass(a.transport);
+    el.dataset.to=seg.to.index;
+    el.style.left=a.x+"%";
+    el.style.top=a.y+"%";
+    el.style.width=length+"%";
+    el.style.transform=`rotate(${angle}deg)`;
+    el.style.setProperty("--counter-angle",(-angle)+"deg");
+    if(i<2){
+      const t=document.createElement("span");
+      t.className="route-traveler "+(i===0?"leg1":"leg2");
+      t.innerHTML="<i></i>";
+      el.appendChild(t);
+    }
+    $("segments").appendChild(el);
+  });
+
+  $("pins").innerHTML="";
+  mapStops.forEach(({stop,index})=>{
+    const p=document.createElement("button");
+    p.className="pin";
+    p.dataset.i=index;
+    p.style.left=stop.x+"%";p.style.top=stop.y+"%";
+    p.innerHTML=`<span class="pin-number">${index+1}</span><span class="pin-label">${stop.name}</span>`;
+    p.onclick=e=>{e.stopPropagation();focusStop(index)};
+    $("pins").appendChild(p);
+  });
+
+  if(!mapStops.length){
+    document.querySelectorAll(".ambient").forEach(x=>x.style.display="none");
+  }else{
+    document.querySelectorAll(".ambient").forEach(x=>x.style.display="");
+  }
+  focusStop(d.stops.findIndex(s=>!s.hidden),false);
+}
+function focusStop(i,scroll=true){
+  document.querySelectorAll(".card,.pin").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(`[data-i="${i}"]`).forEach(el=>el.classList.add("active"));
+  document.querySelectorAll(".segment").forEach(el=>el.classList.toggle("active",Number(el.dataset.to)===i));
+  if(scroll&&innerWidth<881){
+    const c=document.querySelector(`.card[data-i="${i}"]`);
+    if(c)c.scrollIntoView({behavior:"smooth",block:"center"});
+  }
+}
+function apply(){ $("world").style.transform=`translate3d(${panX}px,${panY}px,0) scale(${zoom})`; }
+function resetView(){zoom=1;panX=0;panY=0;apply()}
+$("plus").onclick=()=>{zoom=Math.min(2.35,+(zoom+.15).toFixed(2));apply()};
+$("minus").onclick=()=>{zoom=Math.max(.9,+(zoom-.15).toFixed(2));apply()};
+$("reset").onclick=resetView;
+$("viewport").addEventListener("pointerdown",e=>{
+  if(e.target.closest("button"))return;
+  drag={x:e.clientX,y:e.clientY,px:panX,py:panY};
+  $("viewport").setPointerCapture(e.pointerId);
+});
+$("viewport").addEventListener("pointermove",e=>{
+  if(!drag)return;
+  panX=drag.px+e.clientX-drag.x;
+  panY=drag.py+e.clientY-drag.y;
+  apply();
+});
+["pointerup","pointercancel"].forEach(ev=>$("viewport").addEventListener(ev,()=>drag=null));
+$("viewport").addEventListener("wheel",e=>{
+  e.preventDefault();
+  zoom=Math.min(2.35,Math.max(.9,zoom+(e.deltaY>0?-.08:.08)));
+  apply();
+},{passive:false});
+render();
+</script>
+</body>
+</html>
