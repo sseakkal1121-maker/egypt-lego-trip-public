@@ -9,9 +9,16 @@ All rendering goes through `.claude/skills/video-edit/video.py` (ffmpeg + the Pr
 
 ## Lyric video (main use)
 
-1. Lyrics timing: use the `srt` skill to make `{title}_ko.srt` and `{title}_en.srt` from the lyrics and the WAV. Ignore that skill's CapCut/VectCutAPI and output-path steps — keep the SRTs in `generated-videos/`.
-2. Cover: if the user has none, make one with the `gpt-image` skill (square, no text).
-3. Render:
+1. Lyrics text: follow step 1 of the `srt` skill to settle the Korean lyrics and a line-for-line English version, and get the user's OK. Save them as `{title}_ko.txt` / `{title}_en.txt`, one lyric line per line.
+2. Lyrics timing: instead of that skill's Whisper matching, force-align with Demucs + stable-ts (subtitle text stays exactly the lyrics):
+   ```bash
+   python3 .claude/skills/video-edit/align_lyrics.py --audio song.wav \
+     --lyrics song_ko.txt --translation song_en.txt \
+     --out generated-videos/song_ko.srt --out-translation generated-videos/song_en.srt
+   ```
+   `--model medium` is the default (`small` is faster, `large-v3` more accurate). The first run downloads the model; a 3–4 minute song takes several minutes on CPU. Warn the user if it prints a segment/line count mismatch, and spot-check a few cue times.
+3. Cover: if the user has none, make one with the `gpt-image` skill (square, no text).
+4. Render:
    ```bash
    python3 .claude/skills/video-edit/video.py lyric \
      --image cover.png --audio song.wav \
@@ -40,6 +47,12 @@ python3 .claude/skills/video-edit/video.py vlog --clips a.mp4 b.mp4 c.mp4 \
   --out generated-videos/vlog.mp4
 ```
 Clips are joined in order with crossfades; clips of a different shape sit over a blurred copy of themselves. To trim clips first, cut them with `ffmpeg -ss START -to END -i in.mp4 -c:v libx264 -c:a aac part.mp4`.
+
+## Other tools (installed by the SessionStart hook)
+
+- **Instrumental / vocals only (Demucs):** `demucs --two-stems=vocals -n htdemucs -o generated-videos/stems song.wav` → `vocals.wav` and `no_vocals.wav` (MR / karaoke). Roughly 1–2× the song length on CPU.
+- **Cut silent parts (auto-editor):** `auto-editor talk.mp4 --margin 0.2s --no-open -o generated-videos/talk_cut.mp4` — good for vlog talking clips.
+- **Split long footage into scenes (PySceneDetect):** `scenedetect -i trip.mp4 -o generated-videos/scenes detect-content list-scenes split-video` — then pick scenes for Shorts or the vlog.
 
 ## Notes
 

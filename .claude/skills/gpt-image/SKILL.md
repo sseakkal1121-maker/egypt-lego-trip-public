@@ -25,3 +25,10 @@ Claude cannot generate images itself. Always use this skill for every image requ
 
 - Uses the user's ChatGPT subscription usage, not API credits.
 - For edits or variations, describe the change in a new prompt; Codex can also take a reference image with `-i <file>` if needed.
+
+## Upscaling (e.g. 3000×3000 covers for music distributors)
+
+```bash
+python3 .claude/skills/gpt-image/upscale.py generated-images/cover.png generated-images/cover_3000.jpg --size 3000
+```
+Real-ESRGAN on CPU: about 5–6 minutes for a 1254px image, so run it with a 600000 ms timeout (or in the background) and tell the user it takes a while.
