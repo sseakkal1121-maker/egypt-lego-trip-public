@@ -10,3 +10,28 @@ fi
 if ! command -v codex >/dev/null 2>&1; then
   npm install -g @openai/codex
 fi
+
+# ffmpeg for the video-edit skill
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  apt-get update -qq && apt-get install -y -qq ffmpeg
+fi
+
+# Korean font for video subtitles
+font_dir="$HOME/.local/share/fonts/video-edit"
+if [ ! -s "$font_dir/Pretendard-Bold.otf" ]; then
+  mkdir -p "$font_dir"
+  curl -fsSL -o "$font_dir/Pretendard-Bold.otf" \
+    "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Bold.otf"
+  fc-cache -f >/dev/null 2>&1 || true
+fi
+
+# Python media tools: lyric alignment (stable-ts), vocal separation (demucs),
+# silence cutting (auto-editor), scene splitting (scenedetect), image upscaling (spandrel)
+if ! python3 -c "import stable_whisper, demucs, spandrel, scenedetect, torchvision" >/dev/null 2>&1; then
+  pip3 install --break-system-packages -q torch torchaudio torchvision \
+    --index-url https://download.pytorch.org/whl/cpu
+  pip3 install --break-system-packages -q stable-ts demucs auto-editor scenedetect \
+    opencv-python-headless spandrel
+fi
+# auto-editor fetches its binary on first run
+auto-editor --version >/dev/null 2>&1 || true
